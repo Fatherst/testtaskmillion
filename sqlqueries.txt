@@ -1,0 +1,51 @@
+2.1
+
+SELECT
+    r.user_id,
+    SUM(r.reward) AS total_reward_2022
+FROM
+    reports r
+WHERE
+    r.user_id IN (
+        SELECT
+            user_id
+        FROM
+            reports
+        WHERE
+            EXTRACT(YEAR FROM created_at) = 2021
+        GROUP BY
+            user_id
+        HAVING
+            MIN(created_at) = MIN(CASE WHEN EXTRACT(YEAR FROM created_at) = 2021 THEN created_at END)
+    )
+    AND EXTRACT(YEAR FROM r.created_at) = 2022
+GROUP BY
+    r.user_id;
+
+2.2
+
+SELECT
+    p.title,
+    r.barcode,
+    r.price
+FROM
+    pos p
+JOIN
+    reports r ON p.id = r.pos_id
+GROUP BY
+    p.title, r.barcode, r.price
+ORDER BY
+    p.title;
+
+SELECT
+    p.title,
+    COUNT(DISTINCT r.barcode) AS unique_barcodes,
+    AVG(r.price) AS average_price
+FROM
+    pos p
+JOIN
+    reports r ON p.id = r.pos_id
+GROUP BY
+    p.title
+ORDER BY
+    p.title;
